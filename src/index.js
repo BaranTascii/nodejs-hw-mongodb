@@ -1,6 +1,6 @@
-require("dotenv").config();
-const initMongoConnection = require("./db/initMongoConnection");
-const setupServer = require("./server");
+require('dotenv').config();
+const setupServer = require('./server');
+const initMongoConnection = require('./db/initMongoConnection');
 
 (async () => {
   try {
@@ -15,8 +15,8 @@ const setupServer = require("./server");
 
     const { start } = setupServer();
     start(PORT);
-  } catch (error) {
-    console.error("Application failed to start:", error.message);
+  } catch (err) {
+    console.error('Failed to start application', err);
     process.exit(1);
   }
 })();

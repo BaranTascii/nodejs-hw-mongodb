@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const contactSchema = new mongoose.Schema(
   {
@@ -8,9 +8,9 @@ const contactSchema = new mongoose.Schema(
     isFavourite: { type: Boolean, default: false },
     contactType: {
       type: String,
-      enum: ["work", "home", "personal"],
+      enum: ['work', 'home', 'personal'],
       required: true,
-      default: "personal",
+      default: 'personal',
     },
   },
   {
@@ -18,6 +18,6 @@ const contactSchema = new mongoose.Schema(
   }
 );
 
-const Contact = mongoose.model("Contact", contactSchema);
+const Contact = mongoose.model('Contact', contactSchema);
 
 module.exports = Contact;

@@ -11,7 +11,7 @@ async function initMongoConnection({ user, password, url, dbName }) {
     });
     console.log('Mongo connection successfully established!');
   } catch (err) {
-    console.error('Failed to connect to MongoDB:', err.message);
+    console.error('Failed to connect to MongoDB', err);
     process.exit(1);
   }
 }
