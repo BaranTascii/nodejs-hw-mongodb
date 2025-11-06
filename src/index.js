@@ -1,22 +1,17 @@
-require('dotenv').config();
-const setupServer = require('./server');
-const initMongoConnection = require('./db/initMongoConnection');
+import dotenv from 'dotenv';
+import { initMongoConnection } from './db/initMongoConnection.js';
+import { setupServer } from './server.js';
 
-(async () => {
+dotenv.config();
+
+async function main() {
   try {
-    const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB, PORT } = process.env;
-
-    await initMongoConnection({
-      user: MONGODB_USER,
-      password: MONGODB_PASSWORD,
-      url: MONGODB_URL,
-      dbName: MONGODB_DB,
-    });
-
-    const { start } = setupServer();
-    start(PORT);
-  } catch (err) {
-    console.error('Failed to start application', err);
+    await initMongoConnection();
+    setupServer();
+  } catch (error) {
+    console.error('Failed to start app:', error);
     process.exit(1);
   }
-})();
+}
+
+main();

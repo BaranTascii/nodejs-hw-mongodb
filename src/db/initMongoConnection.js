@@ -1,19 +1,20 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-async function initMongoConnection({ user, password, url, dbName }) {
-  const credentials = user && password ? `${user}:${encodeURIComponent(password)}@` : '';
-  const uri = `mongodb+srv://${credentials}${url}/${dbName}?retryWrites=true&w=majority`;
+export async function initMongoConnection() {
+  const { MONGODB_USER, MONGODB_PASSWORD, MONGODB_URL, MONGODB_DB } = process.env;
 
-  try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Mongo connection successfully established!');
-  } catch (err) {
-    console.error('Failed to connect to MongoDB', err);
-    process.exit(1);
+  if (!MONGODB_USER || !MONGODB_PASSWORD || !MONGODB_URL || !MONGODB_DB) {
+    throw new Error('MongoDB environment variables missing. Check .env');
   }
-}
 
-module.exports = initMongoConnection;
+  const uri = `mongodb+srv://${encodeURIComponent(MONGODB_USER)}:${encodeURIComponent(
+    MONGODB_PASSWORD
+  )}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
+
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  console.log('Mongo connection successfully established!');
+}
