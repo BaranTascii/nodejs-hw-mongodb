@@ -9,6 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Contacts API is running. Use /api/contacts to access endpoints.',
+  });
+});
+
 app.use('/api/contacts', contactsRouter);
 
 app.use(notFoundHandler);
