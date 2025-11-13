@@ -1,35 +1,42 @@
-import { findAllContacts, findContactById } from '../services/contacts.js';
+import * as contactsService from '../services/contacts.js';
 
-export async function getAllContacts(req, res) {
-  try {
-    const contacts = await findAllContacts();
-    return res.status(200).json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-}
+export const getAll = async (req, res) => {
+  const contacts = await contactsService.getAllContacts();
+  res.json({
+    status: 200,
+    message: 'Successfully fetched all contacts!',
+    data: contacts,
+  });
+};
 
-export async function getContactById(req, res) {
-  try {
-    const { contactId } = req.params;
-    const contact = await findContactById(contactId);
+export const getById = async (req, res) => {
+  const contact = await contactsService.getContactById(req.params.contactId);
+  res.json({
+    status: 200,
+    message: 'Successfully fetched contact!',
+    data: contact,
+  });
+};
 
-    if (!contact) {
-      return res.status(404).json({ message: 'Contact not found' });
-    }
+export const create = async (req, res) => {
+  const contact = await contactsService.createContact(req.body);
+  res.status(201).json({
+    status: 201,
+    message: 'Successfully created a contact!',
+    data: contact,
+  });
+};
 
-    return res.status(200).json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}!`,
-      data: contact,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-}
+export const update = async (req, res) => {
+  const updated = await contactsService.updateContact(req.params.contactId, req.body);
+  res.json({
+    status: 200,
+    message: 'Successfully patched a contact!',
+    data: updated,
+  });
+};
+
+export const remove = async (req, res) => {
+  await contactsService.deleteContact(req.params.contactId);
+  res.status(204).send();
+};

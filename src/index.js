@@ -1,17 +1,17 @@
-import dotenv from 'dotenv';
-import { initMongoConnection } from './db/initMongoConnection.js';
-import { setupServer } from './server.js';
+import mongoose from 'mongoose';
+import app from './server.js';
+import 'dotenv/config';
 
-dotenv.config();
+const { MONGODB_URI, PORT = 3000 } = process.env;
 
-async function main() {
-  try {
-    await initMongoConnection();
-    setupServer();
-  } catch (error) {
-    console.error('Failed to start app:', error);
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error(err.message);
     process.exit(1);
-  }
-}
-
-main();
+  });
