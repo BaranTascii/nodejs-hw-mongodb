@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/contacts', contactsRouter);
+app.use('/api/contacts', contactsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
