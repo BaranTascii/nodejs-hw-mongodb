@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'Contacts API is running. Use /api/contacts to access endpoints.',
+    message: 'Contacts API is running.',
   });
 });
 
