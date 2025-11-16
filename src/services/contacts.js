@@ -1,27 +1,33 @@
 import { Contact } from '../models/contact.js';
-import createError from 'http-errors';
 
-export const getAllContacts = async () => {
-  return await Contact.find();
+export const getAllContacts = async ({ page = 1, perPage = 10, sortBy, sortOrder = 'asc', filters = {} } = {}) => {
+  const skip = (page - 1) * perPage;
+  const sort = {};
+  if (sortBy) {
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+  }
+  const query = { ...filters };
+
+  const [data, totalItems] = await Promise.all([
+    Contact.find(query).sort(sort).skip(skip).limit(Number(perPage)).lean(),
+    Contact.countDocuments(query)
+  ]);
+
+  return { data, totalItems };
 };
 
 export const getContactById = async (contactId) => {
-  const contact = await Contact.findById(contactId);
-  if (!contact) throw createError(404, 'Contact not found');
-  return contact;
+  return Contact.findById(contactId).lean();
 };
 
-export const createContact = async (data) => {
-  return await Contact.create(data);
+export const createContact = async (payload) => {
+  return Contact.create(payload);
 };
 
-export const updateContact = async (contactId, data) => {
-  const updated = await Contact.findByIdAndUpdate(contactId, data, { new: true });
-  if (!updated) throw createError(404, 'Contact not found');
-  return updated;
+export const updateContact = async (contactId, payload) => {
+  return Contact.findByIdAndUpdate(contactId, payload, { new: true }).lean();
 };
 
 export const deleteContact = async (contactId) => {
-  const deleted = await Contact.findByIdAndDelete(contactId);
-  if (!deleted) throw createError(404, 'Contact not found');
+  return Contact.findByIdAndDelete(contactId);
 };
