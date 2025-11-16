@@ -1,12 +1,13 @@
-import createError from 'http-errors';
+import Joi from 'joi';
 
 export const validateBody = (schema) => {
   return (req, res, next) => {
-    const { error } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+    const { error } = schema.validate(req.body);
+
     if (error) {
-      const message = error.details.map((d) => d.message).join(', ');
-      return next(createError(400, message));
+      return next(error);
     }
+
     next();
   };
 };
