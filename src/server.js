@@ -14,8 +14,10 @@ app.use(cookieParser());
 
 app.get('/', (req, res) => res.json({ message: 'Contacts API is running.' }));
 
+// auth routes (public)
 app.use('/auth', authRouter);
 
+// contacts routes (router applies authentication internally)
 app.use('/api/contacts', contactsRouter);
 
 app.use(notFoundHandler);

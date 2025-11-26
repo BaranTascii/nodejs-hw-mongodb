@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
 import { User } from '../models/user.js';
-import { Session } from '../models/session.js';
+import { Session } from '../models/Session.js';
 
 const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
 const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
@@ -23,10 +23,12 @@ const parseExpires = (str) => {
   return now;
 };
 
+const signAccess = (payload) => jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRES });
+const signRefresh = (payload) => jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES });
+
 export const register = async ({ name, email, password }) => {
   const existing = await User.findOne({ email });
   if (existing) throw createError(409, 'Email in use');
-
   const hashed = await bcrypt.hash(password, SALT_ROUNDS);
   const user = await User.create({ name, email, password: hashed });
   const obj = user.toObject();
@@ -34,13 +36,9 @@ export const register = async ({ name, email, password }) => {
   return obj;
 };
 
-const signAccess = (payload) => jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRES });
-const signRefresh = (payload) => jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES });
-
 export const login = async ({ email, password }) => {
   const user = await User.findOne({ email });
   if (!user) throw createError(401, 'Email or password is wrong');
-
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw createError(401, 'Email or password is wrong');
 
@@ -57,7 +55,7 @@ export const login = async ({ email, password }) => {
     accessToken,
     refreshToken,
     accessTokenValidUntil,
-    refreshTokenValidUntil
+    refreshTokenValidUntil,
   });
 
   return { accessToken, refreshToken };
@@ -65,34 +63,27 @@ export const login = async ({ email, password }) => {
 
 export const refreshSession = async (refreshToken) => {
   if (!refreshToken) throw createError(401, 'No refresh token');
-
   let payload;
   try {
     payload = jwt.verify(refreshToken, REFRESH_SECRET);
   } catch (err) {
     throw createError(401, 'Invalid refresh token');
   }
-
   const userId = payload.sub;
   const old = await Session.findOne({ userId, refreshToken });
   if (!old) throw createError(401, 'Session not found');
-
   await Session.deleteOne({ _id: old._id });
-
   const accessToken = signAccess({ sub: userId, email: payload.email });
   const newRefresh = signRefresh({ sub: userId, email: payload.email });
-
   const accessTokenValidUntil = parseExpires(ACCESS_EXPIRES);
   const refreshTokenValidUntil = parseExpires(REFRESH_EXPIRES);
-
   await Session.create({
     userId,
     accessToken,
     refreshToken: newRefresh,
     accessTokenValidUntil,
-    refreshTokenValidUntil
+    refreshTokenValidUntil,
   });
-
   return { accessToken, refreshToken: newRefresh };
 };
 
@@ -102,7 +93,7 @@ export const logout = async (refreshToken) => {
 };
 
 export const changePassword = async (userId, newPassword) => {
-  const hashed = await bcrypt.hash(newPassword, 10);
+  const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
   await User.findByIdAndUpdate(userId, { password: hashed });
 };
 
