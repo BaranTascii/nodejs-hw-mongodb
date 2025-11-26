@@ -2,7 +2,7 @@ import * as authService from '../services/auth.js';
 import createError from 'http-errors';
 import { User } from '../models/user.js';
 import { signResetToken, verifyResetToken } from '../utils/token.js';
-import { sendResetEmail } from '../services/mailService.js';
+import { sendResetEmail as sendEmail } from '../services/mailService.js';
 
 export const register = async (req, res, next) => {
   try {
@@ -78,7 +78,7 @@ export const sendResetEmail = async (req, res, next) => {
     const appDomain = process.env.APP_DOMAIN || 'http://localhost:3000';
     const resetLink = `${appDomain.replace(/\/$/, '')}/reset-password?token=${token}`;
     try {
-      await sendResetEmail({ to: email, resetLink });
+      await sendEmail({ to: email, resetLink });
     } catch (err) {
       console.error('Mail send error', err);
       throw createError(500, 'Failed to send the email, please try again later.');

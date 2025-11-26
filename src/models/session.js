@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose'; // Mongoose import'unu 'model' yerine 'mongoose' olarak değiştirin
 
 const sessionSchema = new Schema(
   {
@@ -11,4 +11,4 @@ const sessionSchema = new Schema(
   { timestamps: true }
 );
 
-export const Session = model('Session', sessionSchema);
+export const Session = mongoose.models.Session || mongoose.model('Session', sessionSchema);
