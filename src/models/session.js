@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose'; // Mongoose import'unu 'model' yerine 'mongoose' olarak değiştirin
+import mongoose, { Schema } from 'mongoose';
 
 const sessionSchema = new Schema(
   {
