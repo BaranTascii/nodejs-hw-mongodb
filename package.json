@@ -35,7 +35,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.11",
-    "pino-http": "^11.0.0"
+    "pino-http": "^11.0.0",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
