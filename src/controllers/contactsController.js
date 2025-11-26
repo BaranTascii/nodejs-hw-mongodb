@@ -1,5 +1,7 @@
 import * as contactsService from '../services/contacts.js';
 import createError from 'http-errors';
+import cloudinary from '../config/cloudinary.js';
+import streamifier from 'streamifier';
 
 export const getAll = async (req, res, next) => {
   const { page = 1, perPage = 10, sortBy, sortOrder = 'asc', contactType, isFavourite } = req.query;
@@ -72,4 +74,46 @@ export const remove = async (req, res, next) => {
   const deleted = await contactsService.deleteContact(req.user._id, contactId);
   if (!deleted) throw createError(404, 'Contact not found');
   res.status(204).send();
+};
+
+const uploadBufferToCloudinary = (buffer, folder='contacts') => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
+};
+
+export const create = async (req, res, next) => {
+  try {
+    let photoUrl;
+    if (req.file && req.file.buffer) {
+      const result = await uploadBufferToCloudinary(req.file.buffer, 'contacts');
+      photoUrl = result.secure_url;
+    }
+    const contact = await contactsService.createContact(req.user._id, { ...req.body, photo: photoUrl });
+    res.status(201).json({ status: 201, message: 'Successfully created a contact!', data: contact });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const update = async (req, res, next) => {
+  try {
+    let photoUrl;
+    if (req.file && req.file.buffer) {
+      const result = await uploadBufferToCloudinary(req.file.buffer, 'contacts');
+      photoUrl = result.secure_url;
+    }
+    const payload = { ...req.body };
+    if (photoUrl) payload.photo = photoUrl;
+
+    const updated = await contactsService.updateContact(req.user._id, req.params.contactId, payload);
+    if (!updated) throw createError(404, 'Contact not found');
+    res.status(200).json({ status: 200, message: 'Successfully patched a contact!', data: updated });
+  } catch (err) {
+    next(err);
+  }
 };

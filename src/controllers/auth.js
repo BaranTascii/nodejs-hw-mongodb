@@ -1,5 +1,8 @@
+import { User } from '../models/user.js';
 import * as authService from '../services/auth.js';
 import createError from 'http-errors';
+import { signResetToken, verifyResetToken } from '../utils/token.js';
+import { sendResetEmail } from '../services/mailService.js';
 
 export const register = async (req, res, next) => {
   try {
@@ -68,4 +71,53 @@ export const logout = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const sendResetEmail = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createError(404, 'User not found!');
+  }
+
+  const token = signResetToken({ email });
+  const appDomain = process.env.APP_DOMAIN || 'http://localhost:3000';
+  const resetLink = `${appDomain.replace(/\/$/, '')}/reset-password?token=${token}`;
+
+  try {
+    await sendResetEmail({ to: email, resetLink });
+  } catch (err) {
+    console.error('Mail send error', err);
+    throw createError(500, 'Failed to send the email, please try again later.');
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: 'Reset password email has been successfully sent.',
+    data: {},
+  });
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { token, password } = req.body;
+  let payload;
+  try {
+    payload = verifyResetToken(token);
+  } catch (err) {
+    throw createError(401, 'Token is expired or invalid.');
+  }
+
+  const { email } = payload;
+  const user = await User.findOne({ email });
+  if (!user) throw createError(404, 'User not found!');
+
+  await authService.changePassword(user._id, password);
+
+  await authService.logoutByUserId(user._id);
+
+  res.status(200).json({
+    status: 200,
+    message: 'Password has been successfully reset.',
+    data: {},
+  });
 };
