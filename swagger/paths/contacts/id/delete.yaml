@@ -1,0 +1,16 @@
+delete:
+  tags:
+    - Contacts
+  summary: Delete a contact
+  operationId: deleteContact
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: contactId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Contact deleted

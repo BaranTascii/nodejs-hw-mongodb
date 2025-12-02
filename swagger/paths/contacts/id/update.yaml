@@ -1,0 +1,16 @@
+patch:
+  tags:
+    - Contacts
+  summary: Update a contact
+  operationId: updateContact
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: contactId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Contact updated
